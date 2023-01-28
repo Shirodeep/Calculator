@@ -28,18 +28,20 @@ class CalculatorApp extends StatefulWidget {
 
 class _CalculatorAppState extends State<CalculatorApp> {
   String input = "0";
-  var output = "0";
   bool minusFlip =  false;
   bool equals = false;
-  bool checkOperatorFault(String checkFault){
-    if(checkFault.length > 1){
-      String key2 =  checkFault.substring(checkFault.runes.length - 1);
-      String key =  checkFault.substring(checkFault.length);
+  String testVal = "";
+  bool checkOperatorFault(String checkFault, String testVal){
+
+    if(checkFault.length > 2){
+      String key2 =  checkFault[testVal.length - 1];
+      String key =  checkFault[checkFault.length - 1];
+      debugPrint("debug: $key, $key2");
       if(input.length > 14){
         return true;
       }
       if(key2 == key){
-        // print("l");
+        debugPrint("debug: $key");
         return true;
       }
     }
@@ -48,7 +50,6 @@ class _CalculatorAppState extends State<CalculatorApp> {
   onButtonClick(String value) {
     setState(() {
       if(equals == true){
-        input = output;
         equals = false;
       }
       if(input == "0" && input.length == 1 && value != "0"){
@@ -60,7 +61,6 @@ class _CalculatorAppState extends State<CalculatorApp> {
         case "AC":
           input = "0";
           minusFlip = false;
-          output = "0";
           break;
         case "+/-":
           if (minusFlip == false){
@@ -77,7 +77,7 @@ class _CalculatorAppState extends State<CalculatorApp> {
           }
           else{
             input = input + value;
-            if(checkOperatorFault(input) == true){
+            if(checkOperatorFault(input, testVal) == true){
               input = input.substring(0, input.length -1);
             }
           
@@ -89,7 +89,7 @@ class _CalculatorAppState extends State<CalculatorApp> {
           }
           else{
             input = input + value;
-            if(checkOperatorFault(input) == true){
+            if(checkOperatorFault(input, testVal) == true){
               input = input.substring(0, input.length -1);
             }
           
@@ -101,7 +101,7 @@ class _CalculatorAppState extends State<CalculatorApp> {
           }
           else{
             input = input + value;
-            if(checkOperatorFault(input) == true){
+            if(checkOperatorFault(input, testVal) == true){
               input = input.substring(0, input.length -1);
             }
           
@@ -113,7 +113,7 @@ class _CalculatorAppState extends State<CalculatorApp> {
           }
           else{
             input = input + value;
-            if(checkOperatorFault(input) == true){
+            if(checkOperatorFault(input, testVal) == true){
               input = input.substring(0, input.length -1);
             }  
           }
@@ -123,21 +123,27 @@ class _CalculatorAppState extends State<CalculatorApp> {
           input = input1.toString();
           break;
         case "=": 
+          try{
           String changeChar = input;
           changeChar = input.replaceAll(RegExp(r'x'), "*");
-          changeChar = input.replaceAll(RegExp(r'÷'), "/");
+          changeChar = changeChar.replaceAll(RegExp(r'÷'), "/");
           Parser p  = Parser();
           Expression exp = p.parse(changeChar);
           ContextModel cm = ContextModel();
           double answer = exp.evaluate(EvaluationType.REAL, cm);
-          output = answer.toString();
           equals = true;
+          input = answer.toString();
           break; 
+          }catch(error){
+            input= "Error";
+          }
+          break;
         default:
-        if(input.length < 14){
+        if(input.length < 18){
           input = input + value;
         }
       }
+      testVal = input;
     }
     );
     
@@ -166,11 +172,6 @@ class _CalculatorAppState extends State<CalculatorApp> {
                   const SizedBox(
                     height: 10,
                   ),
-                  Text(output,
-                      textAlign: TextAlign.left,
-                      style: const TextStyle(
-                          fontSize: 80,
-                          color: Color.fromARGB(255, 223, 214, 214))),
                   const SizedBox(
                     height: 10,
                   ),

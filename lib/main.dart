@@ -30,18 +30,27 @@ class _CalculatorAppState extends State<CalculatorApp> {
   String input = "0";
   bool minusFlip =  false;
   bool equals = false;
+  bool inputZero = false;
   String testVal = "";
+  var operatorOverloaded = 0;
+  final checkOperator = <String>["x", "+", "-", "÷"];
   bool checkOperatorFault(String checkFault, String testVal){
-
-    if(checkFault.length > 2){
+    if(checkFault.length >= 2){
       String key2 =  checkFault[testVal.length - 1];
       String key =  checkFault[checkFault.length - 1];
-      debugPrint("debug: $key, $key2");
       if(input.length > 14){
         return true;
       }
       if(key2 == key){
-        debugPrint("debug: $key");
+        return true;
+      }
+      checkOperator.forEach(((element){
+        if(element == key2){
+          operatorOverloaded = 1;
+        }
+      }));
+      if(operatorOverloaded == 1){
+        operatorOverloaded = 0;
         return true;
       }
     }
@@ -49,14 +58,19 @@ class _CalculatorAppState extends State<CalculatorApp> {
   }
   onButtonClick(String value) {
     setState(() {
-      if(equals == true){
         equals = false;
+      if(input == "Error"){
+        input = "";
       }
-      if(input == "0" && input.length == 1 && value != "0"){
+      if(input == "0" && input.length == 1 && value != "0" && value != "."){
       input = "";
       }
       switch (value) {
         case "0":
+          if(input == "0"){
+          }else{
+            input = input + value;
+          }
            break;
         case "AC":
           input = "0";
@@ -119,25 +133,32 @@ class _CalculatorAppState extends State<CalculatorApp> {
           }
           break;  
         case "%":
-          var input1 = int.parse(input) / 100;
-          input = input1.toString();
+        if(input.isNotEmpty){
+          final input1 = int.parse(input) / 100;
+          input = input1.toString(); 
+        }else{
+
+        input = "0";
+        }
           break;
         case "=": 
-          try{
-          String changeChar = input;
-          changeChar = input.replaceAll(RegExp(r'x'), "*");
-          changeChar = changeChar.replaceAll(RegExp(r'÷'), "/");
-          Parser p  = Parser();
-          Expression exp = p.parse(changeChar);
-          ContextModel cm = ContextModel();
-          double answer = exp.evaluate(EvaluationType.REAL, cm);
-          equals = true;
-          input = answer.toString();
+            if(input==""){
+              input = "0";
+              break;
+            }
+              String changeChar = input;
+              changeChar = input.replaceAll(RegExp(r'x'), "*");
+              changeChar = changeChar.replaceAll(RegExp(r'÷'), "/");
+              Parser p  = Parser();
+              Expression exp = p.parse(changeChar);
+              ContextModel cm = ContextModel();
+              double answer = exp.evaluate(EvaluationType.REAL, cm);
+              input = answer.toString();
+              equals = true;
+            // if(input.length < 18){
+              // input = input.substring(0, 17);
+            // }
           break; 
-          }catch(error){
-            input= "Error";
-          }
-          break;
         default:
         if(input.length < 18){
           input = input + value;
